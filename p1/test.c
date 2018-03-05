@@ -1,3 +1,6 @@
+//Xiaohong Zhu
+//CSC220 HW#1
+
 #include <stdio.h>
 #include <stdlib.h>
 
