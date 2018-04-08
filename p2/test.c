@@ -212,10 +212,10 @@ object_t *delete_by_number(tree_node_t *tree, int k)
    object_t *deleted_object; int finished;
    if( tree->leaves == 0 )           // cannot delete because tree empty
       return( NULL );
-   else if ( tree->leaves < (k-1) )  // cannot delete the k-th leaf becasue it doesn't exist
+   else if ( tree->leaves < k )  // cannot delete the k-th leaf becasue it doesn't exist
 	   return( NULL );
-   else if( tree->leaves == 1 && k == 1 )
-   {                                         // delete the only node ( iff k is 1 )
+   else if( tree->leaves == 1 && k == 1 )  // delete the only node ( when k is 1 )
+   {                                         
 		 deleted_object = (object_t *) tree->left;
          tree->left = NULL;
 		 tree->leaves = 0;
@@ -245,6 +245,7 @@ object_t *delete_by_number(tree_node_t *tree, int k)
          upper_node->left  = other_node->left;
          upper_node->right = other_node->right;
          upper_node->height = other_node->height;
+		 upper_node->leaves = other_node->leaves;
          deleted_object = (object_t *) tmp_node->left;
          return_node( tmp_node );
          return_node( other_node );
@@ -328,16 +329,19 @@ void check_tree( tree_node_t *tr, int depth, int lower, int upper )
 void check_tree(tree_node_t* tr, int depth)
 {
 	if (tr->left == NULL)
-	{	printf("Tree empty\n"); 
+	{	
+		printf("Tree empty\n"); 
 		return; 
 	}
 	if (tr->right == NULL)
 	{
+		if (tr->leaves != 1) 
+			printf("Wrong number of leaves at the leaf\n");
 		printf("%d(%d)  ", *((object_t *) tr->left), depth);
 		return;
 	}
 	if (tr->leaves != tr->left->leaves + tr->right->leaves)
-		printf("Wrong number of leaves \n"); 
+		printf("Wrong number of leaves at the node\n"); 
 	check_tree(tr->left, depth+1);
 	check_tree(tr->right, depth+1);
 }
