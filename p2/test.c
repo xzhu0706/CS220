@@ -8,15 +8,12 @@
 #define BLOCKSIZE 256
 
 typedef int object_t;
-//typedef int key_t;
 typedef struct tr_n_t {
                     int 		  leaves;
 					struct tr_n_t  *left;
                     struct tr_n_t *right;
                     int           height; 
                       } tree_node_t;
-
-
 
 tree_node_t *currentblock = NULL;
 int    size_left;
@@ -40,18 +37,15 @@ tree_node_t *get_node()
   return( tmp );
 }
 
-
 void return_node(tree_node_t *node)
 {  node->left = free_list;
    free_list = node;
 }
 
-
 tree_node_t *create_tree(void)
 {  tree_node_t *tmp_node;
    tmp_node = get_node();
    tmp_node->left = NULL;
-//   tmp_node->leaves = 0;
    return( tmp_node );
 }
 
@@ -98,7 +92,7 @@ object_t *find_by_number(tree_node_t *tree, int k) {
 	}
 }
 
-int insert_by_number(tree_node_t *tree, int k, object_t *new_obj)
+void insert_by_number(tree_node_t *tree, int k, object_t *new_obj)
 {
 	tree_node_t *tmp_node;
 	int finished;
@@ -111,7 +105,7 @@ int insert_by_number(tree_node_t *tree, int k, object_t *new_obj)
 	}   
 	// cannot insert to the k-th leaf because (k-1)th leaf doesn't exist
 	else if (tree->leaves < (k - 1))
-		return (-1);
+		return;
 	else
 	{
 		tree_node_t * path_stack[100]; int path_st_p = 0;
@@ -202,33 +196,32 @@ int insert_by_number(tree_node_t *tree, int k, object_t *new_obj)
          if( tmp_node->height == old_height )
             finished = 1;
 	  }
-
 	}	
-	return (0);
 }
 
 object_t *delete_by_number(tree_node_t *tree, int k)
-{  tree_node_t *tmp_node, *upper_node, *other_node;
-   object_t *deleted_object; int finished;
-   if( tree->leaves == 0 )           // cannot delete because tree empty
-      return( NULL );
-   else if ( tree->leaves < k )  // cannot delete the k-th leaf becasue it doesn't exist
-	   return( NULL );
-   else if( tree->leaves == 1 && k == 1 )  // delete the only node ( when k is 1 )
-   {                                         
-		 deleted_object = (object_t *) tree->left;
-         tree->left = NULL;
-		 tree->leaves = 0;
-         return( deleted_object );
-   }
-   else
-   {  
-	   tree_node_t * path_stack[100]; int path_st_p = 0;
+{  
+	tree_node_t *tmp_node, *upper_node, *other_node;
+	object_t *deleted_object; int finished;
+	if( tree->leaves == 0 )           // cannot delete because tree empty
+		return( NULL );
+	else if ( tree->leaves < k )  // cannot delete the k-th leaf becasue it doesn't exist
+		return( NULL );
+   	else if( tree->leaves == 1 && k == 1 )  // delete the only node ( when k is 1 )
+   	{                                         
+		deleted_object = (object_t *) tree->left;
+     	tree->left = NULL;
+	 	tree->leaves = 0;
+     	return( deleted_object );
+   	}
+   	else
+   	{  
+		tree_node_t * path_stack[100]; int path_st_p = 0;
 		tmp_node = tree;
 		while (tmp_node->leaves != 1)
 		{
 			path_stack[path_st_p++] = tmp_node;
-			tmp_node->leaves = tmp_node->leaves - 1;  // update the leaves field along the path
+			tmp_node->leaves = tmp_node->leaves - 1; // update the leaves field along the path
 			upper_node = tmp_node;
 			if (k <= tmp_node->left->leaves) 
 			{	
@@ -242,14 +235,13 @@ object_t *delete_by_number(tree_node_t *tree, int k)
 				other_node = upper_node->left;
 			}
 		}
-         upper_node->left  = other_node->left;
-         upper_node->right = other_node->right;
-         upper_node->height = other_node->height;
-		 upper_node->leaves = other_node->leaves;
-         deleted_object = (object_t *) tmp_node->left;
-         return_node( tmp_node );
-         return_node( other_node );
-
+		upper_node->left  = other_node->left;
+		upper_node->right = other_node->right;
+		upper_node->height = other_node->height;
+		upper_node->leaves = other_node->leaves;
+		deleted_object = (object_t *) tmp_node->left;
+		return_node( tmp_node );
+		return_node( other_node );
       /*start rebalance*/  
       finished = 0; path_st_p -= 1;
       while( path_st_p > 0 && !finished )
@@ -306,108 +298,48 @@ object_t *delete_by_number(tree_node_t *tree, int k)
    }
 }
 
-#if 0
-void check_tree( tree_node_t *tr, int depth, int lower, int upper )
-{  if( tr->left == NULL )
-   {  printf("Tree Empty\n"); return; }
-   if( tr->key < lower || tr->key >= upper )
-         printf("Wrong Key Order \n");
-   if( tr->right == NULL )
-   {  if( *( (int *) tr->left) == 10*tr->key + 2 )
-         printf("%d(%d)  ", tr->key, depth );
-	  else
-         printf("Wrong Object \n");
-   }
-   else
-   {  check_tree(tr->left, depth+1, lower, tr->key ); 
-      check_tree(tr->right, depth+1, tr->key, upper ); 
-   }
-}
-#endif
-#if 1
-/* My test function for checking the tree */
-void check_tree(tree_node_t* tr, int depth)
-{
-	if (tr->left == NULL)
-	{	
-		printf("Tree empty\n"); 
-		return; 
-	}
-	if (tr->right == NULL)
-	{
-		if (tr->leaves != 1) 
-			printf("Wrong number of leaves at the leaf\n");
-		printf("%d(%d)  ", *((object_t *) tr->left), depth);
-		return;
-	}
-	if (tr->leaves != tr->left->leaves + tr->right->leaves)
-		printf("Wrong number of leaves at the node\n"); 
-	check_tree(tr->left, depth+1);
-	check_tree(tr->right, depth+1);
-}
-#endif
-
 int main()
-{  tree_node_t *searchtree;
-   char nextop;
-   searchtree = create_tree();
-   printf("Made Tree: Height-Balanced Tree\n");
-   while( (nextop = getchar())!= 'q' )
-   { if( nextop == 'i' )
-     { int inskey,  *insobj, success;
-       insobj = (int *) malloc(sizeof(int));
-       scanf(" %d", &inskey);
-       *insobj = 10*inskey+2;
-	   success = insert_by_number(searchtree, inskey, insobj);
-	   if ( success == 0 )
-	   	printf(" insert successful, key = %d, object value = %d, \ 
-			   height is %d, has %d leaves\n",
-			   inskey, *insobj, searchtree->height, searchtree->leaves);
-	   else
-		   printf("  insert failed, success = %d\n", success);
-	 }
-     if( nextop == 'f' )
-     { int findkey, *findobj;
-       scanf(" %d", &findkey);
-       findobj = find_by_number( searchtree, findkey);
-       if( findobj == NULL )
-         printf("  find failed, for key %d\n", findkey);
-       else
-         printf("  find successful, found object %d\n", *findobj);
-     }
-     if( nextop == 'd' )
-     { int delkey, *delobj;
-       scanf(" %d", &delkey);
-       delobj = delete_by_number( searchtree, delkey);
-       if( delobj == NULL )
-         printf("  delete failed for key %d\n", delkey);
-       else
-         printf("  delete successful, deleted object %d, height is now %d\n", 
-             *delobj, searchtree->height);
-     }
-#if 0
-     if( nextop == '?' )
-     {  printf("  Checking tree\n"); 
-        check_tree(searchtree,0,-1000,1000);
-        printf("\n");
-        if( searchtree->left != NULL )
-	  printf("key in root is %d, height of tree is %d\n", 
-		 searchtree->key, searchtree->height );
-        printf("  Finished Checking tree\n"); 
-     }
-#endif
-#if 1
-	 if (nextop == '?' )
-	 {
-		printf("  Checking tree\n");
-		check_tree(searchtree,0);
-		printf("\n");
-		if ( searchtree->left != NULL )
-			printf ("toal number of leaves is %d, height of tree is %d\n",
-					searchtree->leaves, searchtree->height );
-		printf(" Finished Checking tree\n");
-	 }
-#endif
+{  tree_node_t *st1, *st2;
+   long i, k; 
+   int o[4] = {0,2,4,6};
+   st1 = create_tree();
+   st2 = create_tree();
+   printf("Made two Trees\n");
+   for( i=0; i < 100000; i++)
+   {  insert_by_number( st1, 1, &(o[1]) ); 
+      insert_by_number( st2, 1, &(o[2]) ); 
    }
-   return(0);
+   /*inserted 100000 pointers each, to 2 in st1 and to 4 in st2 */ 
+   printf("Passed 200000 inserts.\n"); fflush(stdout);
+   for( i=100000; i >0 ; i--)
+   {  insert_by_number( st1, i+1, &(o[3]) );
+      insert_by_number( st1, i+1, &(o[2]) );
+   }
+   /* now st1 is a sequence 246246...246 of length 300000 */
+   for( i=0; i < 100000; i++)
+   {  insert_by_number( st2, 1, &(o[1]) ); 
+   }
+   /* now st2 is a sequence of 100000 2s, followed by 1000000 4s */
+   for( i=0; i < 300000; i++)
+   {  k = *find_by_number(st1, i+1 );
+      if( 2*((i%3)+1) != k )
+      {  printf("Found wrong number %d (should be %d) in tree st1 at line %d\n",
+                k, 2*((i%3)+1), i+1); fflush(stdout); exit(0);
+      }
+   }
+   for( i=300000; i >0; i--)
+   {  k = *find_by_number(st1, i );
+      if( k==6 )
+	delete_by_number(st1, i );
+   }
+   /* now st1 is sequence 24242424... of length 200000 */
+   for( i=0; i < 200000; i++)
+   {  k = *find_by_number(st1, i+1 );
+      if( 2*((i%2)+1) != k )
+      {  printf("Found wrong number %d (should be %d) in tree st1 at line %d\n",
+                k, 2*((i%2)+1), i+1); fflush(stdout); exit(0);
+      }
+   }
+   printf("Passed Test\n"); fflush(stdout);
 }
+
