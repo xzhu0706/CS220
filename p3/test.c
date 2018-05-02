@@ -238,12 +238,13 @@ struct edge_list * Dijkstra(int n, int *graph, int start)
 			pop(visited);
 		finished_v++;
 	}
-	struct edge_list *result, *tmp;
+	struct edge_list *result, *last, *tmp;
 	result = (edge_list *) malloc(sizeof(edge_list));
-	tmp    = (edge_list *) malloc(sizeof(edge_list));
-	tmp->v = pop(visited);
-	tmp->u = pop(visited);
-	tmp->next = NULL;
+	last   = (edge_list *) malloc(sizeof(edge_list));
+	last->v = pop(visited);
+	last->u = pop(visited);
+	last->next = NULL;
+	tmp = last;
 	while (!stack_empty(visited))
 	{
 		result->v    = tmp->u;
