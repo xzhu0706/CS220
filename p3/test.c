@@ -147,23 +147,25 @@ struct edge_list * Dijkstra(int n, int *graph, int start)
         state[i] = unknown;
     stack_t *visited = create_stack(n);
     heap_t *active_v = create_heap(n);
-    int finished_v = 0;
+  //  int finished_v = 0;
     state[start] = active;
     distance[start] = 0;
     int *insobj = (object_t *) malloc(sizeof(object_t));
     *insobj = start;
     insert(0, insobj, active_v);
-    int min_dist, edge_length, v;
+    int min_dist, edge_length, *ver, v;
     heap_el_t* current;
-    while (finished_v < n)
-    {
+ //   while (finished_v < n)
+	while (!heap_empty(active_v))
+	{
         current = find_min(active_v);
 //        current->key = distance[current->key];
-        v = current->object;
+        ver = current->object;
+		v = *ver;
         delete_min(active_v);
         push(v, visited);
         state[current->key] = finished;
-        int no_good = 0;
+        int no_better_path = 0;
         int neighbors = 0;
         for (int j = 0; j < n; j++)
         {
@@ -183,14 +185,14 @@ struct edge_list * Dijkstra(int n, int *graph, int start)
                     if (distance[j] > (distance[v] + edge_length))
                         distance[j] = distance[v] + edge_length;
                     else
-                        no_good++;
+                        no_better_path++;
                 }
                 neighbors++;
             }
         }
-        if (no_good == neighbors && neighbors != 0)
+        if (no_better_path == neighbors && neighbors != 0)
             pop(visited);
-        finished_v++;
+   //     finished_v++;
     }
     struct edge_list *result, *last;
     result = (struct edge_list *) malloc(sizeof(struct edge_list));
